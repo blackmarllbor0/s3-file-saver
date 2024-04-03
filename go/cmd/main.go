@@ -24,7 +24,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	file, err := os.Open("cmd/main.go")
+	file, err := os.Open("config.dev.yaml")
 	defer file.Close()
 	if err != nil {
 		log.Fatalln(err)
@@ -33,4 +33,10 @@ func main() {
 	if err := s3Repo.SaveFile(file); err != nil {
 		log.Fatalln(err)
 	}
+
+	if err := s3Repo.DeleteFile(file.Name()); err != nil {
+		log.Fatalln(err)
+	}
+
+	log.Println("Good test")
 }
