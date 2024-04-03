@@ -1,6 +1,35 @@
 version: "3.7"
 
 services:
+  postgres:
+    image: postgres:16.1-alpine
+    container_name: "sss-db"
+    restart: always
+
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+    ports:
+      - "${POSTGRES_PORT}:5432"
+
+    volumes:
+      - ./data/postgres:/data
+
+    healthcheck:
+      test: [
+        "CMD-SHELL",
+        "pg_isready",
+        "-U",
+        "${POSTGRES_USER}",
+        "-d",
+        "${POSTGRES_DB}"
+      ]
+      interval: 15s
+      timeout: 15s
+      retries: 3
+
   minio:
     image: "minio/minio"
     container_name: sss-s3
@@ -13,3 +42,7 @@ services:
     volumes:
       - ./scripts/minio_init.sh:/scripts/minio_init.sh
       - "./.env.${RUN_MODE}:/.env"
+
+
+volumes:
+  postgres:
