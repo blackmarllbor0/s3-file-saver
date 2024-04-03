@@ -1,0 +1,10 @@
+.env.dev
+.env.prod
+
+go/config.dev.yaml
+go/config.prod.yaml
+
+.vscode
+go/.idea
+
+data

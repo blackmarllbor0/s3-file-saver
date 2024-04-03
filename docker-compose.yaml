@@ -1,0 +1,15 @@
+version: "3.7"
+
+services:
+  minio:
+    image: "minio/minio"
+    container_name: sss-s3
+    ports:
+        - "${MINIO_PORT}:9000"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    entrypoint: /scripts/minio_init.sh
+    volumes:
+      - ./scripts/minio_init.sh:/scripts/minio_init.sh
+      - "./.env.${RUN_MODE}:/.env"
