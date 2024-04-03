@@ -24,7 +24,7 @@ type S3Repo struct {
 }
 
 func NewS3Session(cfgService cfg.ConfigService) (*S3Repo, error) {
-	s3Cfg := cfgService.GetDBConfig().Minio
+	s3Cfg := cfgService.GetRepoConfig().Minio
 
 	sess, err := session.NewSession(&aws.Config{
 		Region:           aws.String(s3Cfg.Region),
@@ -45,7 +45,7 @@ func NewS3Session(cfgService cfg.ConfigService) (*S3Repo, error) {
 
 func (s S3Repo) SaveFile(file *os.File) error {
 	if _, err := s.uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String(s.cfgService.GetDBConfig().Minio.Bucket),
+		Bucket: aws.String(s.cfgService.GetRepoConfig().Minio.Bucket),
 		Key:    aws.String(file.Name()),
 		Body:   file,
 	}); err != nil {
@@ -57,7 +57,7 @@ func (s S3Repo) SaveFile(file *os.File) error {
 
 func (s S3Repo) DeleteFile(fileName string) error {
 	if _, err := s.client.DeleteObjects(&s3.DeleteObjectsInput{
-		Bucket: aws.String(s.cfgService.GetDBConfig().Minio.Bucket),
+		Bucket: aws.String(s.cfgService.GetRepoConfig().Minio.Bucket),
 		Delete: &s3.Delete{
 			Objects: []*s3.ObjectIdentifier{{
 				Key: aws.String(fileName),

@@ -2,9 +2,11 @@ package main
 
 import (
 	"app/internal/cfg"
+	"app/internal/repository/postgres"
 	"app/internal/repository/s3"
 	"app/pkg/runmode"
 	"app/pkg/signal"
+	"context"
 	"log"
 	"os"
 )
@@ -23,6 +25,8 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	_, err = postgres.NewPgConnection(context.Background(), cfgService)
 
 	file, err := os.Open("config.dev.yaml")
 	defer file.Close()

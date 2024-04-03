@@ -8,7 +8,7 @@ import (
 type ConfigService interface {
 	LoadConfig(runMode string) error
 	GetAppConfig() appCfg
-	GetDBConfig() repoCfg
+	GetRepoConfig() repoCfg
 }
 
 type configService struct {
@@ -43,6 +43,6 @@ func (cs *configService) GetAppConfig() appCfg {
 	return cs.app
 }
 
-func (cs *configService) GetDBConfig() repoCfg {
+func (cs *configService) GetRepoConfig() repoCfg {
 	return cs.app.Repo
 }

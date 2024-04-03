@@ -1,0 +1,17 @@
+App:
+  Repo:
+    Minio:
+      User: testtest
+      Pwd: testtest
+      Host: http://localhost
+      Bucket: test
+      Region: us-west-2
+      Port: 9000
+    Postgres:
+      ConnString: postgres://test:test@localhost:5432/test?sslmode=disable
+      MaxCons: 100
+      MinCons: 0
+      MaxConnLifetimeInMinutes: 60
+      MaxConnIdleTimeInMinutes: 30
+      HealthCheckPeriodInSeconds: 60
+      ConnectTimeoutInSeconds: 5
