@@ -9,3 +9,11 @@ build:
 .PHONY:down
 down:
 	docker-compose down
+
+.PHONY:migrate-up
+migrate-up:
+	migrate -database $(POSTGRES_CONN_STRING) -path ./migrations/pg up
+
+.PHONY:migrate-down
+migrate-down:
+	migrate -database $(POSTGRES_CONN_STRING) -path ./migrations/pg down
