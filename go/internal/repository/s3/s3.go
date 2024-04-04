@@ -9,11 +9,17 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"os"
+	"sync"
 )
 
-type a interface {
+// todo: understand the point:
+// todo: creating folders as a structure (possible emulating folders through obj naming)
+
+type FileWorker interface {
 	SaveFile(file *os.File) error
+	SaveFiles([]*os.File) error
 	DeleteFile(fileName string) error
+	GetFolderFiles(folderName string) ([]string, error)
 }
 
 type S3Repo struct {
@@ -55,6 +61,37 @@ func (s S3Repo) SaveFile(file *os.File) error {
 	return nil
 }
 
+func (s S3Repo) SaveFiles(files []*os.File) error {
+	var wg sync.WaitGroup
+	wg.Add(len(files))
+	errorsCh := make(chan error, len(files))
+
+	for _, file := range files {
+		go func(file *os.File) {
+			defer wg.Done()
+			if err := s.SaveFile(file); err != nil {
+				errorsCh <- err
+				return
+			}
+		}(file)
+	}
+
+	go func() {
+		wg.Wait()
+		close(errorsCh)
+	}()
+
+	for err := range errorsCh {
+		// todo: figure out how to properly handle multiply errs.
+		// todo: look at transaction account in s3.
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (s S3Repo) DeleteFile(fileName string) error {
 	if _, err := s.client.DeleteObjects(&s3.DeleteObjectsInput{
 		Bucket: aws.String(s.cfgService.GetRepoConfig().Minio.Bucket),
@@ -68,4 +105,21 @@ func (s S3Repo) DeleteFile(fileName string) error {
 	}
 
 	return nil
+}
+
+func (s S3Repo) GetFolderFiles(folderName string) ([]string, error) {
+	res, err := s.client.ListObjectsV2(&s3.ListObjectsV2Input{
+		Bucket: aws.String(s.cfgService.GetRepoConfig().Minio.Bucket),
+		Prefix: aws.String(folderName),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("s3: failed to get field from %s folder: %v", folderName, err)
+	}
+
+	fileList := make([]string, len(res.Contents))
+	for i, content := range res.Contents {
+		fileList[i] = *content.Key
+	}
+
+	return fileList, nil
 }

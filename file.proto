@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+option go_package = "internal/proto";
+
+message File {
+  string name = 1;
+  bytes content = 2;
+}
+
+message FileName {
+  string name = 1;
+}
+
+message FolderName {
+  string name = 1;
+}
+
+message Files {
+  repeated File files = 1;
+}
+
+message FileList {
+  repeated FileName files = 1;
+}
+
+message EmptyResponse {}
+
+service FileWorker {
+  rpc SaveFile(File) returns (EmptyResponse);
+  rpc SaveFiles(Files) returns (EmptyResponse);
+  rpc DeleteFile(FileName) returns (EmptyResponse);
+  rpc GetFolderFiles(FolderName) returns (FileList);
+}

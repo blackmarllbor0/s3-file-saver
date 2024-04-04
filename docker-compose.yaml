@@ -1,6 +1,24 @@
 version: "3.7"
 
 services:
+  minio:
+    image: "minio/minio"
+    container_name: sss-s3
+    restart: always
+
+    ports:
+      - "${MINIO_PORT}:9000"
+
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    entrypoint: /scripts/minio_init.sh
+    volumes:
+      - ./scripts/minio_init.sh:/scripts/minio_init.sh
+      - "./.env.${RUN_MODE}:/.env"
+      - ./data/s3:/data
+
+
   postgres:
     image: postgres:16.1-alpine
     container_name: "sss-db"
@@ -29,24 +47,6 @@ services:
       interval: 15s
       timeout: 15s
       retries: 3
-
-  minio:
-    image: "minio/minio"
-    container_name: sss-s3
-    restart: always
-
-    ports:
-        - "${MINIO_PORT}:9000"
-
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-    entrypoint: /scripts/minio_init.sh
-    volumes:
-      - ./scripts/minio_init.sh:/scripts/minio_init.sh
-      - "./.env.${RUN_MODE}:/.env"
-      - ./data/s3:/data
-
 
 volumes:
   postgres:
