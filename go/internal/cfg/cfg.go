@@ -9,6 +9,7 @@ type ConfigService interface {
 	LoadConfig(runMode string) error
 	GetAppConfig() appCfg
 	GetRepoConfig() repoCfg
+	GetTransportConfig() transportCfg
 }
 
 type configService struct {
@@ -45,4 +46,8 @@ func (cs *configService) GetAppConfig() appCfg {
 
 func (cs *configService) GetRepoConfig() repoCfg {
 	return cs.app.Repo
+}
+
+func (cs *configService) GetTransportConfig() transportCfg {
+	return cs.app.Transport
 }

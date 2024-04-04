@@ -4,11 +4,11 @@ import (
 	"app/internal/cfg"
 	"app/internal/repository/postgres"
 	"app/internal/repository/s3"
+	"app/internal/transport/grpc"
 	"app/pkg/runmode"
 	"app/pkg/signal"
 	"context"
 	"log"
-	"os"
 )
 
 func main() {
@@ -21,26 +21,21 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	s3Repo, err := s3.NewS3Session(cfgService)
+	_, err := s3.NewS3Session(cfgService)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	_, err = postgres.NewPgConnection(context.Background(), cfgService)
 
-	file, err := os.Open("config.dev.yaml")
-	defer file.Close()
+	gRPCConn, err := grpc.NewGRPCConnection(
+		cfgService.GetTransportConfig().GRPC.Host,
+		cfgService.GetTransportConfig().GRPC.Port,
+	)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	if err := s3Repo.SaveFile(file); err != nil {
-		log.Fatalln(err)
-	}
-
-	if err := s3Repo.DeleteFile(file.Name()); err != nil {
-		log.Fatalln(err)
-	}
-
-	log.Println("Good test")
+	fileClient := grpc.NewFileWorkerClient(gRPCConn)
+	_, err := fileClient.SaveFile(context.Background())
 }

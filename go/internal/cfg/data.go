@@ -1,12 +1,22 @@
 package cfg
 
 type appCfg struct {
-	Repo repoCfg `yaml:"Repo"`
+	Repo      repoCfg      `yaml:"Repo"`
+	Transport transportCfg `yaml:"Transport"`
 }
 
 type repoCfg struct {
 	Minio    minioCfg `yaml:"Minio"`
 	Postgres pgCfg    `yaml:"Postgres"`
+}
+
+type transportCfg struct {
+	GRPC gRPC
+}
+
+type gRPC struct {
+	Host string `yaml:"Host"`
+	Port uint64 `yaml:"Port"`
 }
 
 type minioCfg struct {

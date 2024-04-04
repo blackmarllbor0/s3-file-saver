@@ -8,3 +8,5 @@ go/config.prod.yaml
 go/.idea
 
 data
+
+node/node_modules
