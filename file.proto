@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "internal/proto";
+option go_package = "internal/transport/grpc";
 
 message File {
   string name = 1;

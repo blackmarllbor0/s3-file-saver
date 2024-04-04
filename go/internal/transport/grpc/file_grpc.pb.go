@@ -4,7 +4,7 @@
 // - protoc             v5.26.0--rc2
 // source: file.proto
 
-package proto
+package grpc
 
 import (
 	context "context"
