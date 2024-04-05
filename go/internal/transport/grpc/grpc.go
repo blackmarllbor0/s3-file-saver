@@ -1,15 +1,44 @@
 package grpc
 
 import (
+	"app/internal/cfg"
+	"app/internal/service"
 	"fmt"
-	"google.golang.org/grpc"
+	"log"
+	"net"
+
+	grpc "google.golang.org/grpc"
 )
 
-func NewGRPCConnection(host string, port uint64) (*grpc.ClientConn, error) {
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", host, port))
+type GRPCServer struct {
+	cfgService cfg.ConfigService
+
+	fileWorkerService service.FileWorkerService
+}
+
+func NewGRPCServer(cfgService cfg.ConfigService, fileWorkerService service.FileWorkerService) *GRPCServer {
+	return &GRPCServer{
+		cfgService:        cfgService,
+		fileWorkerService: fileWorkerService,
+	}
+}
+
+func (g GRPCServer) ListenGRPCServer() error {
+	addr := fmt.Sprintf("%s:%d", g.cfgService.GetTransportConfig().GRPC.Host, g.cfgService.GetTransportConfig().GRPC.Port)
+	liestener, err := net.Listen("tcp", addr)
 	if err != nil {
-		return nil, fmt.Errorf("grpc: failed to open connection: %v", err)
+		return fmt.Errorf("grpc: failed to listen tcp: %v", err)
 	}
 
-	return conn, nil
+	server := grpc.NewServer()
+
+	RegisterFileWorkerServer(s, g.fileWorkerService)
+
+	if err := server.Serve(liestener); err != nil {
+		return fmt.Errorf("grpc: failed to serve server: %v", err)
+	}
+
+	log.Println("")
+
+	return nil
 }

@@ -28,14 +28,7 @@ func main() {
 
 	_, err = postgres.NewPgConnection(context.Background(), cfgService)
 
-	gRPCConn, err := grpc.NewGRPCConnection(
-		cfgService.GetTransportConfig().GRPC.Host,
-		cfgService.GetTransportConfig().GRPC.Port,
-	)
-	if err != nil {
+	if err := grpc.ListenGRPCServer(cfgService); err != nil {
 		log.Fatalln(err)
 	}
-
-	fileClient := grpc.NewFileWorkerClient(gRPCConn)
-	_, err := fileClient.SaveFile(context.Background())
 }
