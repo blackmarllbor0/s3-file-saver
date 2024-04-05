@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package fileworker;
+
 option go_package = "internal/transport/grpc";
 
 message File {

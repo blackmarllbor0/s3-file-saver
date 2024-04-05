@@ -3,9 +3,15 @@
 
 go/config.dev.yaml
 go/config.prod.yaml
+node/.env.dev
+node/.env.prod
 
 .vscode
+.idea
 go/.idea
+go/.vscode
+node/.idea
+node/.vscode
 
 data
 
