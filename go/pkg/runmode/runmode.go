@@ -5,6 +5,7 @@ import "os"
 const (
 	DEV  = "dev"
 	PROD = "prod"
+	TEST = "test"
 )
 
 func GetAppRunMode() (runMode string) {
