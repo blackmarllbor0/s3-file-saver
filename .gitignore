@@ -1,21 +1,21 @@
 .env.dev
 .env.prod
 
-go/logs
+go-file-worker/logs
 
-go/config.dev.yaml
-go/config.prod.yaml
-node/.env.dev
-node/.env.prod
+go-file-worker/config.dev.yaml
+go-file-worker/config.prod.yaml
+node-http-transport/.env.dev
+node-http-transport/.env.prod
 
 .vscode
 .idea
-go/.idea
-go/.vscode
-node/.idea
-node/.vscode
+go-file-worker/.idea
+go-file-worker/.vscode
+node-http-transport/.idea
+node-http-transport/.vscode
 
 data
 
-node/node_modules
-node/dist
+node-http-transport/node_modules
+node-http-transport/dist
