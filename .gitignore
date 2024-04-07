@@ -1,6 +1,8 @@
 .env.dev
 .env.prod
 
+go/logs
+
 go/config.dev.yaml
 go/config.prod.yaml
 node/.env.dev
@@ -16,3 +18,4 @@ node/.vscode
 data
 
 node/node_modules
+node/dist

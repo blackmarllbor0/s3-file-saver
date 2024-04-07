@@ -4,7 +4,7 @@
 // - protoc             v5.26.0--rc2
 // source: file.proto
 
-package grpc
+package grpcClient
 
 import (
 	context "context"
@@ -19,10 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	FileWorker_SaveFile_FullMethodName       = "/FileWorker/SaveFile"
-	FileWorker_SaveFiles_FullMethodName      = "/FileWorker/SaveFiles"
-	FileWorker_DeleteFile_FullMethodName     = "/FileWorker/DeleteFile"
-	FileWorker_GetFolderFiles_FullMethodName = "/FileWorker/GetFolderFiles"
+	FileWorker_SaveFile_FullMethodName       = "/fileworker.FileWorker/SaveFile"
+	FileWorker_SaveFiles_FullMethodName      = "/fileworker.FileWorker/SaveFiles"
+	FileWorker_DeleteFile_FullMethodName     = "/fileworker.FileWorker/DeleteFile"
+	FileWorker_GetFolderFiles_FullMethodName = "/fileworker.FileWorker/GetFolderFiles"
 )
 
 // FileWorkerClient is the client API for FileWorker service.
@@ -195,7 +195,7 @@ func _FileWorker_GetFolderFiles_Handler(srv interface{}, ctx context.Context, de
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var FileWorker_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "FileWorker",
+	ServiceName: "fileworker.FileWorker",
 	HandlerType: (*FileWorkerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

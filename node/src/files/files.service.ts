@@ -10,7 +10,7 @@ interface IFileService {
 
 @Injectable()
 export class FilesService implements OnModuleInit {
-  constructor(private readonly configService: ConfigService) {}
+  constructor() {}
 
   @Client({
     transport: Transport.GRPC,

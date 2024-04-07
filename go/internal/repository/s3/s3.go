@@ -2,6 +2,9 @@ package s3
 
 import (
 	"app/internal/cfg"
+	"app/pkg/logger"
+	"bytes"
+	"context"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -16,7 +19,7 @@ import (
 // todo: creating folders as a structure (possible emulating folders through obj naming)
 
 type FileWorker interface {
-	SaveFile(file *os.File) error
+	SaveFile(ctx context.Context, filename string, body []byte) error
 	SaveFiles([]*os.File) error
 	DeleteFile(fileName string) error
 	GetFolderFiles(folderName string) ([]string, error)
@@ -27,9 +30,10 @@ type S3Repo struct {
 	client   *s3.S3
 
 	cfgService cfg.ConfigService
+	logService logger.LoggerService
 }
 
-func NewS3Session(cfgService cfg.ConfigService) (*S3Repo, error) {
+func NewS3Session(cfgService cfg.ConfigService, logService logger.LoggerService) (*S3Repo, error) {
 	s3Cfg := cfgService.GetRepoConfig().Minio
 
 	sess, err := session.NewSession(&aws.Config{
@@ -39,24 +43,38 @@ func NewS3Session(cfgService cfg.ConfigService) (*S3Repo, error) {
 		Credentials:      credentials.NewStaticCredentials(s3Cfg.User, s3Cfg.Pwd, ""),
 	})
 	if err != nil {
-		return nil, fmt.Errorf("s3: failed to create session: %v", err)
+		err := fmt.Errorf("s3.NewS3Session: failed to create session: %v", err)
+
+		logService.Error(err.Error())
+
+		return nil, err
 	}
+
+	go logService.Info("s3.NewS3Session: successfully created s3 session")
 
 	return &S3Repo{
 		uploader:   s3manager.NewUploader(sess),
-		cfgService: cfgService,
 		client:     s3.New(sess),
+		cfgService: cfgService,
+		logService: logService,
 	}, nil
 }
 
-func (s S3Repo) SaveFile(file *os.File) error {
-	if _, err := s.uploader.Upload(&s3manager.UploadInput{
+func (s S3Repo) SaveFile(ctx context.Context, filename string, body []byte) error {
+	reader := bytes.NewReader(body)
+	if _, err := s.client.PutObjectWithContext(ctx, &s3.PutObjectInput{
 		Bucket: aws.String(s.cfgService.GetRepoConfig().Minio.Bucket),
-		Key:    aws.String(file.Name()),
-		Body:   file,
+		Key:    aws.String(filename),
+		Body:   reader,
 	}); err != nil {
-		return fmt.Errorf("s3: failed to upload file %v: %v", file.Name(), err)
+		err := fmt.Errorf("s3.S3Repo.SaveFile: failed to upload file %v: %v", filename, err)
+
+		s.logService.Error(err.Error())
+
+		return err
 	}
+
+	go s.logService.Info(fmt.Sprintf("s3.S3Repo.SaveFile: %s file successfuly loaded to storage", filename))
 
 	return nil
 }
@@ -69,7 +87,8 @@ func (s S3Repo) SaveFiles(files []*os.File) error {
 	for _, file := range files {
 		go func(file *os.File) {
 			defer wg.Done()
-			if err := s.SaveFile(file); err != nil {
+			// todo: set args
+			if err := s.SaveFile(nil, "nil", nil); err != nil {
 				errorsCh <- err
 				return
 			}

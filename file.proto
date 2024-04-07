@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package fileworker;
 
-option go_package = "internal/transport/grpc";
+option go_package = "internal/transport/grpcClient";
 
 message File {
   string name = 1;
