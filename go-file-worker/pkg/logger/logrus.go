@@ -21,6 +21,7 @@ type logrusLogger struct {
 	outputFiles map[string]*os.File
 
 	logger *logrus.Logger
+	multi  *MultiWriter
 }
 
 func NewLogrusLogger(runMode string) (LoggerService, error) {
@@ -47,6 +48,10 @@ func NewLogrusLogger(runMode string) (LoggerService, error) {
 		ls.outputFiles[level] = file
 	}
 
+	ls.multi = &MultiWriter{
+		Stdout: os.Stdout,
+	}
+
 	logger := logrus.New()
 	logger.SetLevel(logrus.Level(getLevelByAppRunMode(runMode)))
 	logger.SetFormatter(&logrus.TextFormatter{
@@ -54,6 +59,7 @@ func NewLogrusLogger(runMode string) (LoggerService, error) {
 		PadLevelText:    true,
 		TimestampFormat: "2006-01-02 15:04:05",
 	})
+	logger.SetOutput(ls.multi)
 
 	ls.logger = logger
 
@@ -61,17 +67,17 @@ func NewLogrusLogger(runMode string) (LoggerService, error) {
 }
 
 func (l *logrusLogger) Info(args ...interface{}) {
-	l.logger.SetOutput(l.outputFiles[infoOut])
+	l.multi.File = l.outputFiles[infoOut]
 	l.logger.Info(args...)
 }
 
 func (l *logrusLogger) Warn(args ...interface{}) {
-	l.logger.SetOutput(l.outputFiles[warnOut])
+	l.multi.File = l.outputFiles[warnOut]
 	l.logger.Warn(args...)
 }
 
 func (l *logrusLogger) Error(args ...interface{}) {
-	l.logger.SetOutput(l.outputFiles[errorOut])
+	l.multi.File = l.outputFiles[errorOut]
 	l.logger.Error(args...)
 }
 
