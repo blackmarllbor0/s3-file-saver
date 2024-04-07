@@ -1,13 +1,15 @@
-.env.dev
-.env.prod
-
+# logs
 go-file-worker/logs
 
+# configs
+.env.dev
+.env.prod
 go-file-worker/config.dev.yaml
 go-file-worker/config.prod.yaml
 node-http-transport/.env.dev
 node-http-transport/.env.prod
 
+# ide settings
 .vscode
 .idea
 go-file-worker/.idea
@@ -15,7 +17,9 @@ go-file-worker/.vscode
 node-http-transport/.idea
 node-http-transport/.vscode
 
+# docker data
 data
 
+# build
 node-http-transport/node_modules
 node-http-transport/dist
