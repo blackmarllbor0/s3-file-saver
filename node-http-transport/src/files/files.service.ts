@@ -4,8 +4,18 @@ import { Client, ClientGrpc, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { Observable } from 'rxjs';
 
+interface File {
+  content: Buffer;
+  name: string;
+}
+
 interface IFileService {
-  saveFile(file: { content: Buffer; name: string }): Observable<{}>;
+  saveFile(file: File): Observable<{}>;
+  saveFiles(files: File[]): Observable<{}>;
+  deleteFile(fileInfo: { name: string }): Observable<{}>;
+  getFolderFiles(folder: {
+    name: string;
+  }): Observable<{ files: { name: string }[] }>;
 }
 
 @Injectable()
