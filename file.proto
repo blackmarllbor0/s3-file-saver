@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package fileworker;
 
+import "google/api/annotations.proto";
+
 option go_package = "internal/transport/grpcClient";
 
 message FileMetadata {
@@ -42,8 +44,27 @@ message DefaultResponse {
 }
 
 service FileWorker {
-  rpc SaveFile(File) returns (DefaultResponse);
-  rpc SaveFiles(Files) returns (DefaultResponse);
-  rpc DeleteFile(FileNames) returns (DefaultResponse);
-  rpc GetFolderFiles(FolderName) returns (Files);
+  rpc SaveFile(File) returns (DefaultResponse) {
+    option (google.api.http) = {
+      post: "/upload/"
+      body: "*"
+    };
+  }
+  rpc SaveFiles(Files) returns (DefaultResponse) {
+    option (google.api.http) = {
+      post: "/upload-many/"
+      body: "*"
+    };
+  }
+  rpc DeleteFile(FileNames) returns (DefaultResponse) {
+    option (google.api.http) = {
+      delete: "/"
+      body: "*"
+    };
+  }
+  rpc GetFolderFiles(FolderName) returns (Files) {
+    option (google.api.http) = {
+      get: "/?name"
+    };
+  }
 }
