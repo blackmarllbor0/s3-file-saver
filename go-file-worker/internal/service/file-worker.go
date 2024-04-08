@@ -90,6 +90,8 @@ func (f fileWorkerService) SaveFile(ctx context.Context, file *grpcClient.File) 
 		return errResponse, fmt.Errorf(errResponse.Error.ErrorMsg)
 	}
 
+	defer conn.Release()
+
 	return &grpcClient.DefaultResponse{
 		Msg: aws.String(fmt.Sprintf(
 			"service.fileWorkerService.SaveFile: %s file successfully uploaded", file.GetName()),
@@ -153,6 +155,8 @@ func (f fileWorkerService) SaveFiles(ctx context.Context, files *grpcClient.File
 
 		return errResponse, fmt.Errorf(errResponse.Error.ErrorMsg)
 	}
+
+	defer conn.Release()
 
 	return &grpcClient.DefaultResponse{
 		Msg: aws.String("service.fileWorkerService.SaveFiles: all files successfully saved"),
