@@ -4,32 +4,46 @@ package fileworker;
 
 option go_package = "internal/transport/grpcClient";
 
+message FileMetadata {
+  string filename = 1;
+  string encoding = 2;
+  string contentType = 3;
+  string path = 4;
+  string ext = 5;
+  int64 size = 6;
+}
+
 message File {
   string name = 1;
   bytes content = 2;
-}
-
-message FileName {
-  string name = 1;
-}
-
-message FolderName {
-  string name = 1;
+  FileMetadata metadata = 3;
 }
 
 message Files {
   repeated File files = 1;
 }
 
-message FileList {
-  repeated FileName files = 1;
+message FileNames {
+  repeated string name = 1;
 }
 
-message EmptyResponse {}
+message FolderName {
+  string name = 1;
+}
+
+message ResponseError {
+  string errorMsg = 1;
+  uint32 errorCode = 2;
+}
+
+message DefaultResponse {
+  optional ResponseError error = 1;
+  optional string msg = 2;
+}
 
 service FileWorker {
-  rpc SaveFile(File) returns (EmptyResponse);
-  rpc SaveFiles(Files) returns (EmptyResponse);
-  rpc DeleteFile(FileName) returns (EmptyResponse);
-  rpc GetFolderFiles(FolderName) returns (FileList);
+  rpc SaveFile(File) returns (DefaultResponse);
+  rpc SaveFiles(Files) returns (DefaultResponse);
+  rpc DeleteFile(FileNames) returns (DefaultResponse);
+  rpc GetFolderFiles(FolderName) returns (Files);
 }
