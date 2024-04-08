@@ -29,10 +29,10 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type FileWorkerClient interface {
-	SaveFile(ctx context.Context, in *File, opts ...grpc.CallOption) (*EmptyResponse, error)
-	SaveFiles(ctx context.Context, in *Files, opts ...grpc.CallOption) (*EmptyResponse, error)
-	DeleteFile(ctx context.Context, in *FileName, opts ...grpc.CallOption) (*EmptyResponse, error)
-	GetFolderFiles(ctx context.Context, in *FolderName, opts ...grpc.CallOption) (*FileList, error)
+	SaveFile(ctx context.Context, in *File, opts ...grpc.CallOption) (*DefaultResponse, error)
+	SaveFiles(ctx context.Context, in *Files, opts ...grpc.CallOption) (*DefaultResponse, error)
+	DeleteFile(ctx context.Context, in *FileNames, opts ...grpc.CallOption) (*DefaultResponse, error)
+	GetFolderFiles(ctx context.Context, in *FolderName, opts ...grpc.CallOption) (*Files, error)
 }
 
 type fileWorkerClient struct {
@@ -43,8 +43,8 @@ func NewFileWorkerClient(cc grpc.ClientConnInterface) FileWorkerClient {
 	return &fileWorkerClient{cc}
 }
 
-func (c *fileWorkerClient) SaveFile(ctx context.Context, in *File, opts ...grpc.CallOption) (*EmptyResponse, error) {
-	out := new(EmptyResponse)
+func (c *fileWorkerClient) SaveFile(ctx context.Context, in *File, opts ...grpc.CallOption) (*DefaultResponse, error) {
+	out := new(DefaultResponse)
 	err := c.cc.Invoke(ctx, FileWorker_SaveFile_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -52,8 +52,8 @@ func (c *fileWorkerClient) SaveFile(ctx context.Context, in *File, opts ...grpc.
 	return out, nil
 }
 
-func (c *fileWorkerClient) SaveFiles(ctx context.Context, in *Files, opts ...grpc.CallOption) (*EmptyResponse, error) {
-	out := new(EmptyResponse)
+func (c *fileWorkerClient) SaveFiles(ctx context.Context, in *Files, opts ...grpc.CallOption) (*DefaultResponse, error) {
+	out := new(DefaultResponse)
 	err := c.cc.Invoke(ctx, FileWorker_SaveFiles_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -61,8 +61,8 @@ func (c *fileWorkerClient) SaveFiles(ctx context.Context, in *Files, opts ...grp
 	return out, nil
 }
 
-func (c *fileWorkerClient) DeleteFile(ctx context.Context, in *FileName, opts ...grpc.CallOption) (*EmptyResponse, error) {
-	out := new(EmptyResponse)
+func (c *fileWorkerClient) DeleteFile(ctx context.Context, in *FileNames, opts ...grpc.CallOption) (*DefaultResponse, error) {
+	out := new(DefaultResponse)
 	err := c.cc.Invoke(ctx, FileWorker_DeleteFile_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -70,8 +70,8 @@ func (c *fileWorkerClient) DeleteFile(ctx context.Context, in *FileName, opts ..
 	return out, nil
 }
 
-func (c *fileWorkerClient) GetFolderFiles(ctx context.Context, in *FolderName, opts ...grpc.CallOption) (*FileList, error) {
-	out := new(FileList)
+func (c *fileWorkerClient) GetFolderFiles(ctx context.Context, in *FolderName, opts ...grpc.CallOption) (*Files, error) {
+	out := new(Files)
 	err := c.cc.Invoke(ctx, FileWorker_GetFolderFiles_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -83,10 +83,10 @@ func (c *fileWorkerClient) GetFolderFiles(ctx context.Context, in *FolderName, o
 // All implementations must embed UnimplementedFileWorkerServer
 // for forward compatibility
 type FileWorkerServer interface {
-	SaveFile(context.Context, *File) (*EmptyResponse, error)
-	SaveFiles(context.Context, *Files) (*EmptyResponse, error)
-	DeleteFile(context.Context, *FileName) (*EmptyResponse, error)
-	GetFolderFiles(context.Context, *FolderName) (*FileList, error)
+	SaveFile(context.Context, *File) (*DefaultResponse, error)
+	SaveFiles(context.Context, *Files) (*DefaultResponse, error)
+	DeleteFile(context.Context, *FileNames) (*DefaultResponse, error)
+	GetFolderFiles(context.Context, *FolderName) (*Files, error)
 	mustEmbedUnimplementedFileWorkerServer()
 }
 
@@ -94,16 +94,16 @@ type FileWorkerServer interface {
 type UnimplementedFileWorkerServer struct {
 }
 
-func (UnimplementedFileWorkerServer) SaveFile(context.Context, *File) (*EmptyResponse, error) {
+func (UnimplementedFileWorkerServer) SaveFile(context.Context, *File) (*DefaultResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SaveFile not implemented")
 }
-func (UnimplementedFileWorkerServer) SaveFiles(context.Context, *Files) (*EmptyResponse, error) {
+func (UnimplementedFileWorkerServer) SaveFiles(context.Context, *Files) (*DefaultResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SaveFiles not implemented")
 }
-func (UnimplementedFileWorkerServer) DeleteFile(context.Context, *FileName) (*EmptyResponse, error) {
+func (UnimplementedFileWorkerServer) DeleteFile(context.Context, *FileNames) (*DefaultResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteFile not implemented")
 }
-func (UnimplementedFileWorkerServer) GetFolderFiles(context.Context, *FolderName) (*FileList, error) {
+func (UnimplementedFileWorkerServer) GetFolderFiles(context.Context, *FolderName) (*Files, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFolderFiles not implemented")
 }
 func (UnimplementedFileWorkerServer) mustEmbedUnimplementedFileWorkerServer() {}
@@ -156,7 +156,7 @@ func _FileWorker_SaveFiles_Handler(srv interface{}, ctx context.Context, dec fun
 }
 
 func _FileWorker_DeleteFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(FileName)
+	in := new(FileNames)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -168,7 +168,7 @@ func _FileWorker_DeleteFile_Handler(srv interface{}, ctx context.Context, dec fu
 		FullMethod: FileWorker_DeleteFile_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FileWorkerServer).DeleteFile(ctx, req.(*FileName))
+		return srv.(FileWorkerServer).DeleteFile(ctx, req.(*FileNames))
 	}
 	return interceptor(ctx, in, info, handler)
 }

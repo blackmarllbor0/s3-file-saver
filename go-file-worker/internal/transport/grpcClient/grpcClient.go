@@ -29,7 +29,7 @@ func NewGRPCServer(
 	}
 }
 
-func (g GRPCServer) ListenGRPCServer() error {
+func (g *GRPCServer) ListenGRPCServer() error {
 	addr := fmt.Sprintf("%s:%d", g.cfgService.GetTransportConfig().GRPC.Host, g.cfgService.GetTransportConfig().GRPC.Port)
 	liestener, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -61,7 +61,7 @@ func (g GRPCServer) ListenGRPCServer() error {
 	return nil
 }
 
-func (g GRPCServer) Stop() {
+func (g *GRPCServer) Stop() {
 	g.server.Stop()
 	g.logService.Info("grpcClient.GRPCServer.Stop: grpc server successfully stopped")
 }

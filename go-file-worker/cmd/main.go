@@ -1,6 +1,9 @@
 package main
 
 import (
+	"context"
+	"log"
+
 	"app/internal/cfg"
 	"app/internal/repository/postgres"
 	"app/internal/repository/s3"
@@ -9,8 +12,6 @@ import (
 	"app/pkg/logger"
 	"app/pkg/runmode"
 	"app/pkg/signal"
-	"context"
-	"log"
 )
 
 func main() {
@@ -28,7 +29,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	_, err = postgres.NewPgConnection(context.Background(), cfgService, logrusLogger)
+	pool, err := postgres.NewPgConnection(context.Background(), cfgService, logrusLogger)
 
 	fileMetadataRepo := postgres.NewFileMetadataRepo()
 	fileRepo, err := s3.NewS3Session(cfgService, logrusLogger)
@@ -36,7 +37,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	fileWorkerService := service.NewFileWorkerService(fileRepo, fileMetadataRepo)
+	fileWorkerService := service.NewFileWorkerService(fileRepo, fileMetadataRepo, pool)
 
 	server := grpcClient.NewGRPCServer(fileWorkerService, cfgService, logrusLogger)
 	if err := server.ListenGRPCServer(); err != nil {
