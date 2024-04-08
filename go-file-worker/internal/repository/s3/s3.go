@@ -11,7 +11,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"os"
 	"sync"
 )
 
@@ -20,8 +19,8 @@ import (
 
 type FileWorker interface {
 	SaveFile(ctx context.Context, filename string, body []byte) error
-	SaveFiles([]*os.File) error
-	DeleteFile(fileName string) error
+	SaveFiles(ctx context.Context, files map[string][]byte) error
+	DeleteFile(ctx context.Context, fileNames []string) error
 	GetFolderFiles(folderName string) ([]string, error)
 }
 
@@ -79,26 +78,23 @@ func (s S3Repo) SaveFile(ctx context.Context, filename string, body []byte) erro
 	return nil
 }
 
-func (s S3Repo) SaveFiles(files []*os.File) error {
-	var wg sync.WaitGroup
+func (s S3Repo) SaveFiles(ctx context.Context, files map[string][]byte) error {
+	wg := sync.WaitGroup{}
 	wg.Add(len(files))
 	errorsCh := make(chan error, len(files))
 
-	for _, file := range files {
-		go func(file *os.File) {
+	for filename, fileBytes := range files {
+		go func(filename string, fileBytes []byte) {
 			defer wg.Done()
-			// todo: set args
-			if err := s.SaveFile(nil, "nil", nil); err != nil {
+			if err := s.SaveFile(ctx, filename, fileBytes); err != nil {
 				errorsCh <- err
 				return
 			}
-		}(file)
+		}(filename, fileBytes)
 	}
 
-	go func() {
-		wg.Wait()
-		close(errorsCh)
-	}()
+	wg.Wait()
+	close(errorsCh)
 
 	for err := range errorsCh {
 		// todo: figure out how to properly handle multiply errs.
@@ -111,16 +107,21 @@ func (s S3Repo) SaveFiles(files []*os.File) error {
 	return nil
 }
 
-func (s S3Repo) DeleteFile(fileName string) error {
-	if _, err := s.client.DeleteObjects(&s3.DeleteObjectsInput{
+func (s S3Repo) DeleteFile(ctx context.Context, fileNames []string) error {
+	deleteFiles := make([]*s3.ObjectIdentifier, len(fileNames))
+	for idx, filename := range fileNames {
+		deleteFiles[idx] = &s3.ObjectIdentifier{
+			Key: aws.String(filename),
+		}
+	}
+
+	if _, err := s.client.DeleteObjectsWithContext(ctx, &s3.DeleteObjectsInput{
 		Bucket: aws.String(s.cfgService.GetRepoConfig().Minio.Bucket),
 		Delete: &s3.Delete{
-			Objects: []*s3.ObjectIdentifier{{
-				Key: aws.String(fileName),
-			}},
+			Objects: deleteFiles,
 		},
 	}); err != nil {
-		return fmt.Errorf("s3: failed to delete file by key: %s: %v", fileName, err)
+		return fmt.Errorf("s3S3Repo.DeleteFile: failed to delete files: %v", err)
 	}
 
 	return nil
